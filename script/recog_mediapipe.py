@@ -95,6 +95,22 @@ class RecogMediaPipe:
             return (origin, x_axis, y_axis, z_axis)
 
 
+    def convert_uvz_to_xyz(self, u, v, z, R, t, K):
+        K_inv = np.linalg.inv(K)
+
+        # in screen coord
+        cs = np.asarray([u, v, 1])
+        cs_ = cs * z
+
+        # in camera coord
+        cc = np.dot(K_inv, cs_)
+
+        # in world coord
+        cw = np.dot(R, cc) + t
+
+        return cw
+
+
     def cb_recog(self, smi_rgb, smi_d):
 
         with self.mp_objectron.Objectron(static_image_mode=self.is_static_mode,
