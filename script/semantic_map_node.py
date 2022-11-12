@@ -199,9 +199,14 @@ class SemanticMap():
             marker_data.color.b = 0.0
             marker_data.color.a = 1.0
 
-            marker_data.scale.x = 1
-            marker_data.scale.y = 1.1
-            marker_data.scale.z = 1.1
+            # 大きさを合わせて表示
+            scale_x = abs(verts3D[0][0] - verts3D[0][4])
+            scale_y = abs(verts3D[0][0] - verts3D[0][3])
+            scale_z = abs(verts3D[0][0] - verts3D[0][1])
+
+            marker_data.scale.x = scale_x
+            marker_data.scale.y = scale_y
+            marker_data.scale.z = scale_z
 
             marker_data.lifetime = rospy.Duration(10)
             marker_data.type = 1
