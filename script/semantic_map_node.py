@@ -200,9 +200,9 @@ class SemanticMap():
             marker_data.color.a = 1.0
 
             # 大きさを合わせて表示
-            scale_x = abs(verts3D[0][0] - verts3D[0][4])
-            scale_y = abs(verts3D[0][0] - verts3D[0][3])
-            scale_z = abs(verts3D[0][0] - verts3D[0][1])
+            scale_x = abs(verts3D[0][0] - verts3D[4][0])
+            scale_y = abs(verts3D[0][2] - verts3D[3][2])
+            scale_z = abs(verts3D[0][1] - verts3D[1][1])
 
             marker_data.scale.x = scale_x
             marker_data.scale.y = scale_y
@@ -220,7 +220,7 @@ class SemanticMap():
             # 結果をrosで出力
 
             # フォーマットを変更するための一時的対処
-            path = roslib.packages.get_pkg_dir("semantic_map") + "/script/output/segmented_image.jpg"
+            path = roslib.packages.get_pkg_dir("semantic_map") + "/io/images/segmented_image.jpg"
             
             cv2.imwrite(path, im_drawn_rgb)
             im_segment = cv2.imread(path, 1)
