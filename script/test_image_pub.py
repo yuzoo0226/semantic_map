@@ -12,7 +12,7 @@ sys.path.append(roslib.packages.get_pkg_dir("semantic_map") + "/include/omni3d/"
 
 class TestImagePubliher():
     def __init__(self) -> None:
-        image_path = roslib.packages.get_pkg_dir("semantic_map") + "/include/omni3d/datasets/hma/chair.jpg"
+        image_path = roslib.packages.get_pkg_dir("semantic_map") + "/io/images/chair.jpg"
         self.test_image = cv2.imread(image_path, 1)
         self.pub_image = rospy.Publisher("/image/test", Image, queue_size=10)
         self.bridge = CvBridge()
