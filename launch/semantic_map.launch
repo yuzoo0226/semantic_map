@@ -2,6 +2,7 @@
 
     <!-- test image publish -->
     <node pkg="semantic_map" type="test_image_pub.py" name="test_image_publisher" output="screen" />
+    <node pkg="rosbag" type="play" name="player" args="-l --clock $(find semantic_map)/io/rosbag/hma_test_1.bag" />
 
     <!-- semantic_mapのノードを起動 -->
     <node pkg="semantic_map" type="semantic_map_node.py" name="semantic_map_node" output="screen" />
@@ -17,7 +18,7 @@
         <arg name="odom_frame_id" default="odom" />
         <arg name="rtabmapviz" default="false" />
         <arg name="rviz" default="false" />
-        <arg name="database_path" default="$(find hma_common_pkg)/io/rtabmap/rtabmap.db" />
+        <arg name="database_path" default="$(find semantic_map)/io/rtabmap/20211220_demo_rtabmap.db" />
         <arg name="subscribe_scan" default="true" />
         <arg name="scan_topic" default="/hsrb/base_scan" />
         <arg name="output" default="log" />
