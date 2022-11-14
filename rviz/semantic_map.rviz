@@ -7,8 +7,8 @@ Panels:
         - /Global Options1
         - /Status1
         - /Input Image1
-        - /Segmentation Result1
-        - /Map1/Status1
+        - /Axes1
+        - /detected_furniture1
       Splitter Ratio: 0.5
     Tree Height: 614
   - Class: rviz/Selection
@@ -56,7 +56,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /image/test
+      Image Topic: /hsrb/head_rgbd_sensor/rgb/image_raw
       Max Value: 1
       Median window: 5
       Min Value: 0
@@ -95,7 +95,7 @@ Visualization Manager:
       Marker Topic: /arrow_pub
       Name: Marker
       Namespaces:
-        basic_shapes: true
+        {}
       Queue Size: 100
       Value: true
     - Alpha: 0.699999988079071
@@ -107,6 +107,24 @@ Visualization Manager:
       Topic: /rtabmap/grid_map
       Unreliable: false
       Use Timestamp: false
+      Value: true
+    - Alpha: 1
+      Class: rviz/Axes
+      Enabled: true
+      Length: 1
+      Name: Axes
+      Radius: 0.10000000149011612
+      Reference Frame: head_rgbd_sensor_rgb_frame
+      Show Trail: false
+      Value: true
+    - Alpha: 1
+      Class: rviz/Axes
+      Enabled: true
+      Length: 1
+      Name: detected_furniture
+      Radius: 0.10000000149011612
+      Reference Frame: detected/object
+      Show Trail: false
       Value: true
   Enabled: true
   Global Options:
@@ -136,7 +154,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 13.448624610900879
+      Distance: 15.101624488830566
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -144,17 +162,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
+        X: 1.3707647323608398
+        Y: -0.6127172708511353
+        Z: 0.32185184955596924
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5353981256484985
+      Pitch: 0.3247963786125183
       Target Frame: <Fixed Frame>
-      Yaw: 3.3685834407806396
+      Yaw: 0.24358311295509338
     Saved: ~
 Window Geometry:
   Displays:
