@@ -7,6 +7,7 @@ Panels:
         - /Global Options1
         - /Status1
         - /Input Image1
+        - /Marker1
         - /Axes1
         - /detected_furniture1
       Splitter Ratio: 0.5
@@ -92,10 +93,10 @@ Visualization Manager:
       Value: true
     - Class: rviz/Marker
       Enabled: true
-      Marker Topic: /arrow_pub
+      Marker Topic: /marker/object
       Name: Marker
       Namespaces:
-        {}
+        basic_shapes: true
       Queue Size: 100
       Value: true
     - Alpha: 0.699999988079071
@@ -170,9 +171,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.3247963786125183
+      Pitch: 1.134796142578125
       Target Frame: <Fixed Frame>
-      Yaw: 0.24358311295509338
+      Yaw: 2.861760377883911
     Saved: ~
 Window Geometry:
   Displays:

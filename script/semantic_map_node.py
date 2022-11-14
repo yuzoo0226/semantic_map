@@ -45,7 +45,6 @@ class SemanticMap():
     def __init__(self, args) -> None:
         # ROS interface
         self.bridge = CvBridge()
-        self.pub = rospy.Publisher("/marker_temp", Marker, queue_size=10)
         # self.img_sub = rospy.Subscriber("/image/test", Image, self.cb_segmentation_furniture, queue_size=10)
         self.img_sub = rospy.Subscriber("/hsrb/head_rgbd_sensor/rgb/image_raw", Image, self.cb_segmentation_furniture, queue_size=10)
 
@@ -56,6 +55,7 @@ class SemanticMap():
         # omni3dの結果をrosでpubish
         self.pub_seg_img = rospy.Publisher("/omni3d/result/segmentation", Image, queue_size=10)
         self.pub_novel_img = rospy.Publisher("/omni3d/result/novel_view", Image, queue_size=10)
+        self.pub_marker = rospy.Publisher("/marker/object", Marker, queue_size=10)
 
         # omni3dの動作時に指定する引数
         # self.config_file = "cubercnn://omni3d/cubercnn_DLA34_FPN.yaml"
@@ -82,7 +82,15 @@ class SemanticMap():
         DetectionCheckpointer(self.model, save_dir=self.cfg.OUTPUT_DIR).resume_or_load(
             self.cfg.MODEL.WEIGHTS, resume=True
         )
+
+        min_size = self.cfg.INPUT.MIN_SIZE_TEST
+        max_size = self.cfg.INPUT.MAX_SIZE_TEST
+        self.augmentations = T.AugmentationList([T.ResizeShortestEdge(min_size, max_size, "choice")])
         # omni3Dの動作時に必要なモデルなどの設定終了
+
+
+        self.p_publish_type = "marker"
+        self.rate = rospy.Rate(25)
 
         self.verts3D = None
         pass
@@ -95,14 +103,14 @@ class SemanticMap():
 
         self.model.eval()
 
-        thres = self.args.threshold
+        # thres = self.args.threshold
 
-        output_dir = self.cfg.OUTPUT_DIR
-        min_size = self.cfg.INPUT.MIN_SIZE_TEST
-        max_size = self.cfg.INPUT.MAX_SIZE_TEST
-        augmentations = T.AugmentationList([T.ResizeShortestEdge(min_size, max_size, "choice")])
+        # output_dir = self.cfg.OUTPUT_DIR
+        # min_size = self.cfg.INPUT.MIN_SIZE_TEST
+        # max_size = self.cfg.INPUT.MAX_SIZE_TEST
+        # augmentations = T.AugmentationList([T.ResizeShortestEdge(min_size, max_size, "choice")])
 
-        util.mkdir_if_missing(output_dir)
+        # util.mkdir_if_missing(output_dir)
 
         category_path = os.path.join(util.file_parts(self.args.config_file)[0], 'category_meta.json')
             
@@ -137,7 +145,7 @@ class SemanticMap():
         ])
 
         aug_input = T.AugInput(im)
-        _ = augmentations(aug_input)
+        _ = self.augmentations(aug_input)
         image = aug_input.image
 
         batched = [{
@@ -158,7 +166,7 @@ class SemanticMap():
                 )):
 
                 # skip
-                if score < thres:
+                if score < self.args.threshold:
                     continue
                 
                 cat = cats[cat_idx]
@@ -176,70 +184,65 @@ class SemanticMap():
             im_drawn_rgb, im_topdown, _, verts3D = vis.draw_scene_view(im, K, meshes, text=meshes_text, scale=im.shape[0], blend_weight=0.5, blend_weight_overlay=0.85)
             print(verts3D)
 
-            pub = rospy.Publisher("arrow_pub", Marker, queue_size=10)
-            rate = rospy.Rate(25)
+            parent_frame = "head_rgbd_sensor_link"
+            if self.p_publish_type == "marker":
+                # publish
+                marker_data = Marker()
+                marker_data.header.frame_id = parent_frame
+                # marker_data.header.stamp = rospy.Time.now()
 
-            # # publish
-            # marker_data = Marker()
-            # marker_data.header.frame_id = "map"
-            # marker_data.header.stamp = rospy.Time.now()
+                marker_data.ns = "basic_shapes"
+                marker_data.id = 1
 
-            # marker_data.ns = "basic_shapes"
-            # marker_data.id = 1
+                marker_data.action = Marker.ADD
 
-            # marker_data.action = Marker.ADD
+                # omni3dからの結果をもとにマーカーを出力する
+                # omni3dのxyzとrosでのxyzが一致していないことに注意
+                marker_data.pose.position.x = verts3D[0][1]
+                marker_data.pose.position.y = verts3D[0][0]
+                marker_data.pose.position.z = verts3D[0][2]
 
-            # # omni3dからの結果をもとにマーカーを出力する
-            # # omni3dのxyzとrosでのxyzが一致していないことに注意
-            # marker_data.pose.position.x = verts3D[0][0]
-            # marker_data.pose.position.y = verts3D[0][2]
-            # marker_data.pose.position.z = verts3D[0][1]
+                marker_data.pose.orientation.x = 0.0
+                marker_data.pose.orientation.y = 0.0
+                marker_data.pose.orientation.z = 1.0
+                marker_data.pose.orientation.w = 0.0
 
-            # # marker_data.pose.position.x = 0
-            # # marker_data.pose.position.y = 0
-            # # marker_data.pose.position.z = 0
+                marker_data.color.r = 1.0
+                marker_data.color.g = 0.0
+                marker_data.color.b = 0.0
+                marker_data.color.a = 1.0
 
+                # 大きさを合わせて表示
+                scale_z = abs(verts3D[0][1] - verts3D[1][1])
+                scale_y = abs(verts3D[0][2] - verts3D[3][2])
+                scale_x = abs(verts3D[0][0] - verts3D[4][0])
 
-            # marker_data.pose.orientation.x=0.0
-            # marker_data.pose.orientation.y=0.0
-            # marker_data.pose.orientation.z=1.0
-            # marker_data.pose.orientation.w=0.0
+                marker_data.scale.x = scale_x
+                marker_data.scale.y = scale_y
+                marker_data.scale.z = scale_z
 
-            # marker_data.color.r = 1.0
-            # marker_data.color.g = 0.0
-            # marker_data.color.b = 0.0
-            # marker_data.color.a = 1.0
+                marker_data.lifetime = rospy.Duration(10)
+                marker_data.type = 1
 
-            # # 大きさを合わせて表示
-            # scale_x = abs(verts3D[0][0] - verts3D[4][0])
-            # scale_y = abs(verts3D[0][2] - verts3D[3][2])
-            # scale_z = abs(verts3D[0][1] - verts3D[1][1])
+                self.pub_marker.publish(marker_data)
 
-            # marker_data.scale.x = scale_x
-            # marker_data.scale.y = scale_y
-            # marker_data.scale.z = scale_z
+            else:
+                # tfとしてpublish
+                # self.tf_data.header.stamp = rospy.Time.now()
+                self.tf_data.header.frame_id = parent_frame
+                self.tf_data.child_frame_id = "/detected/object"
 
-            # marker_data.lifetime = rospy.Duration(10)
-            # marker_data.type = 1
+                self.tf_data.transform.translation.x = verts3D[0][1]
+                self.tf_data.transform.translation.y = verts3D[0][0]
+                self.tf_data.transform.translation.z = verts3D[0][2]
 
-            # pub.publish(marker_data)
+                quat = tf.transformations.quaternion_from_euler(0, 0, 1)
+                self.tf_data.transform.rotation.x = quat[0]
+                self.tf_data.transform.rotation.y = quat[1]
+                self.tf_data.transform.rotation.z = quat[2]
+                self.tf_data.transform.rotation.w = quat[3]
 
-            # tfとしてpublish
-            # self.tf_data.header.stamp = rospy.Time.now()
-            self.tf_data.header.frame_id = "head_rgbd_sensor_rgb_frame"
-            self.tf_data.child_frame_id = "/detected/object"
-
-            self.tf_data.transform.translation.x = verts3D[1][1]
-            self.tf_data.transform.translation.y = verts3D[1][0]
-            self.tf_data.transform.translation.z = verts3D[1][2]
-
-            quat = tf.transformations.quaternion_from_euler(0, 0, 1)
-            self.tf_data.transform.rotation.x = quat[0]
-            self.tf_data.transform.rotation.y = quat[1]
-            self.tf_data.transform.rotation.z = quat[2]
-            self.tf_data.transform.rotation.w = quat[3]
-
-            self.tf_br.sendTransform(self.tf_data)
+                self.tf_br.sendTransform(self.tf_data)
 
             if self.args.display:
                 im_concat = np.concatenate((im_drawn_rgb, im_topdown), axis=1)
