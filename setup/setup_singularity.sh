@@ -47,6 +47,10 @@ make
 make install
 apt-get install ros-noetic-move-base -y
 
+cd ~/hma_ws
+git clone https://github.com/introlab/rtabmap_ros.git src/rtabmap_ros
+catkin_make
+
 
 # # test for omni3d
 # cd ~

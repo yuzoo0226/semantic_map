@@ -101,7 +101,11 @@ class SemanticMap():
 
         # list_of_ims = util.list_files(os.path.join(args.input_folder, ''), '*')
 
+        # try:
         self.model.eval()
+        # except:
+        #     print("before initalize")
+        #     return
 
         # thres = self.args.threshold
 
@@ -144,6 +148,7 @@ class SemanticMap():
             [0.0, 0.0, 1.0]
         ])
 
+
         aug_input = T.AugInput(im)
         _ = self.augmentations(aug_input)
         image = aug_input.image
@@ -183,6 +188,10 @@ class SemanticMap():
         if len(meshes) > 0:
             im_drawn_rgb, im_topdown, _, verts3D = vis.draw_scene_view(im, K, meshes, text=meshes_text, scale=im.shape[0], blend_weight=0.5, blend_weight_overlay=0.85)
             print(verts3D)
+            print(bbox3D)
+            print(K)
+            print(corners3D)
+            print(pose.tolist())
 
             parent_frame = "head_rgbd_sensor_link"
             if self.p_publish_type == "marker":
@@ -198,24 +207,33 @@ class SemanticMap():
 
                 # omni3dからの結果をもとにマーカーを出力する
                 # omni3dのxyzとrosでのxyzが一致していないことに注意
-                marker_data.pose.position.x = verts3D[0][1]
-                marker_data.pose.position.y = verts3D[0][0]
-                marker_data.pose.position.z = verts3D[0][2]
+                # marker_data.pose.position.x = -corners3D[0][1]
+                # marker_data.pose.position.y = corners3D[0][0]
+                # marker_data.pose.position.z = corners3D[0][2]
 
-                marker_data.pose.orientation.x = 0.0
-                marker_data.pose.orientation.y = 0.0
-                marker_data.pose.orientation.z = 1.0
-                marker_data.pose.orientation.w = 0.0
+                marker_data.pose.position.x = bbox3D[0]
+                marker_data.pose.position.y = bbox3D[1] - 0.5
+                marker_data.pose.position.z = bbox3D[2] - 0.5
 
-                marker_data.color.r = 1.0
+
+                marker_data.pose.orientation.x = 0.25
+                marker_data.pose.orientation.y = 0
+                marker_data.pose.orientation.z = 0
+                marker_data.pose.orientation.w = 0.95
+
+                marker_data.color.r = 1
                 marker_data.color.g = 0.0
                 marker_data.color.b = 0.0
-                marker_data.color.a = 1.0
+                marker_data.color.a = 1
 
                 # 大きさを合わせて表示
-                scale_z = abs(verts3D[0][1] - verts3D[1][1])
-                scale_y = abs(verts3D[0][2] - verts3D[3][2])
-                scale_x = abs(verts3D[0][0] - verts3D[4][0])
+                # scale_x = abs(verts3D[0][1] - verts3D[1][1])
+                # scale_y = abs(verts3D[0][2] - verts3D[3][2])
+                # scale_z = abs(verts3D[0][0] - verts3D[4][0])
+
+                scale_x = bbox3D[3]
+                scale_y = bbox3D[4]
+                scale_z = bbox3D[5]
 
                 marker_data.scale.x = scale_x
                 marker_data.scale.y = scale_y
