@@ -35,9 +35,21 @@ pip install torch==1.8.0+cu111 torchvision==0.9.0+cu111 -f https://download.pyto
 export FORCE_CUDA=1
 pip install "git+https://github.com/facebookresearch/pytorch3d.git"
 git clone https://github.com/facebookresearch/detectron2.git
-python -m pip install -e detectron2
+python3 -m pip install -e detectron2
 pip install scipy pandas opencv-python
 pip install 'git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI'
+
+# rtabmapの環境構築
+git clone https://github.com/introlab/rtabmap.git rtabmap
+cd rtabmap/build
+cmake .. 
+make
+make install
+apt-get install ros-noetic-move-base -y
+
+cd ~/hma_ws
+git clone https://github.com/introlab/rtabmap_ros.git src/rtabmap_ros
+catkin_make
 
 
 # # test for omni3d

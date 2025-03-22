@@ -1,14 +1,15 @@
 <launch>
 
     <!-- test image publish -->
-    <node pkg="semantic_map" type="test_image_pub.py" name="test_image_publisher" output="screen" />
+    <!-- <node pkg="semantic_map" type="test_image_pub.py" name="test_image_publisher" output="screen" /> -->
+    <node pkg="rosbag" type="play" name="player" args="--clock -l $(find semantic_map)/io/rosbag/hma_test_7.bag" />
 
     <!-- semantic_mapのノードを起動 -->
     <node pkg="semantic_map" type="semantic_map_node.py" name="semantic_map_node" output="screen" />
 
     <!-- rtabmapの起動 -->
     <!-- 事前にRtabmapをセットアップする必要あり -->
-    <!-- <include file="$(find rtabmap_ros)/launch/rtabmap.launch">
+    <include file="$(find rtabmap_ros)/launch/rtabmap.launch">
         <arg name="rgb_topic" default="/hsrb/head_rgbd_sensor/rgb/image_raw" />
         <arg name="depth_topic" default="/hsrb/head_rgbd_sensor/depth_registered/image_raw" />
         <arg name="camera_info_topic" default="/hsrb/head_rgbd_sensor/rgb/camera_info" />
@@ -17,12 +18,12 @@
         <arg name="odom_frame_id" default="odom" />
         <arg name="rtabmapviz" default="false" />
         <arg name="rviz" default="false" />
-        <arg name="database_path" default="$(find hma_common_pkg)/io/rtabmap/rtabmap.db" />
+        <arg name="database_path" default="$(find semantic_map)/io/rtabmap/hma_test_6.db" />
         <arg name="subscribe_scan" default="true" />
         <arg name="scan_topic" default="/hsrb/base_scan" />
         <arg name="output" default="log" />
-        <arg name="localization" default="true" />
-    </include> -->
+        <arg name="localization" default="false" />
+    </include>
 
 
     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find semantic_map)/rviz/semantic_map.rviz"/>
